@@ -226,7 +226,6 @@ func createParentOpt(clicontext *cli.Context, pipeFDEnvKey, stateDirEnvKey, pare
 	opt := parent.Opt{
 		PipeFDEnvKey:     pipeFDEnvKey,
 		StateDirEnvKey:   stateDirEnvKey,
-		StateDirTemp:     false,
 		CreatePIDNS:      clicontext.Bool("pidns"),
 		CreateCgroupNS:   clicontext.Bool("cgroupns"),
 		CreateUTSNS:      clicontext.Bool("utsns"),
@@ -241,7 +240,6 @@ func createParentOpt(clicontext *cli.Context, pipeFDEnvKey, stateDirEnvKey, pare
 		if err != nil {
 			return opt, errors.Wrap(err, "creating a state directory")
 		}
-		opt.StateDirTemp = true
 	} else {
 		opt.StateDir, err = filepath.Abs(opt.StateDir)
 		if err != nil {
