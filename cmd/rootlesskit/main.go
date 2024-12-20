@@ -161,6 +161,10 @@ See https://rootlesscontaine.rs/getting-started/common/ .
 			Usage: "copy-up mode [tmpfs+symlink]",
 			Value: "tmpfs+symlink",
 		}, CategoryMount),
+		Categorize(&cli.StringSliceFlag{
+			Name:  "copy-up-exclude",
+			Usage: "list of files or directories excluded for copy-up sources",
+		}, CategoryMount),
 		Categorize(&cli.StringFlag{
 			Name:  "port-driver",
 			Usage: "port driver for non-host network. [none, implicit (for pasta), builtin, slirp4netns]",
@@ -601,6 +605,7 @@ func createChildOpt(clicontext *cli.Context) (child.Opt, error) {
 		StateDirEnvKey:  stateDirEnvKey,
 		TargetCmd:       clicontext.Args().Slice(),
 		MountProcfs:     pidns,
+		CopyUpExcludedFiles: clicontext.StringSlice("copy-up-exclude"),
 		DetachNetNS:     detachNetNS,
 		Propagation:     clicontext.String("propagation"),
 		EvacuateCgroup2: clicontext.String("evacuate-cgroup2") != "",
@@ -637,7 +642,11 @@ func createChildOpt(clicontext *cli.Context) (child.Opt, error) {
 	opt.CopyUpDirs = clicontext.StringSlice("copy-up")
 	switch s := clicontext.String("copy-up-mode"); s {
 	case "tmpfs+symlink":
-		opt.CopyUpDriver = tmpfssymlink.NewChildDriver()
+		if len(clicontext.StringSlice("copy-up-exclude")) == 0 {
+			opt.CopyUpDriver = tmpfssymlink.NewChildDriver()
+		} else {
+			opt.CopyUpDriver = tmpfssymlink.NewChildDriverWithExclusion(clicontext.StringSlice("copy-up-exclude"))
+		}
 		if len(opt.CopyUpDirs) != 0 && (opt.Propagation == "rshared" || opt.Propagation == "shared") {
 			return opt, fmt.Errorf("propagation %s does not support copy-up driver %s", opt.Propagation, s)
 		}

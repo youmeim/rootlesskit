@@ -279,6 +279,7 @@ type Opt struct {
 	NetworkDriver   network.ChildDriver // nil for HostNetwork
 	CopyUpDriver    copyup.ChildDriver  // cannot be nil if len(CopyUpDirs) != 0
 	CopyUpDirs      []string
+	CopyUpExcludedFiles []string
 	DetachNetNS     bool
 	PortDriver      port.ChildDriver
 	MountProcfs     bool   // needs to be set if (and only if) parent.Opt.CreatePIDNS is set
